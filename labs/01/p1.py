@@ -24,7 +24,7 @@ while(cmd != "checkout"):
             else:
                 cart[cmdsplit[3]] = float(cmdsplit[1])
         else:
-            print(f"Error! {cmdsplit[1]} not found!")
+            print(f"Error! {cmdsplit[3]} not found!")
     elif(cmdsplit[0] == "price"):
         try: 
             print(f"{cmdsplit[1]} are ${fruit[cmdsplit[1]]} per pound")
