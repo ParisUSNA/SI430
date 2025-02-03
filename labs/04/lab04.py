@@ -90,7 +90,7 @@ def printIP(data):
     (length, ) = struct.unpack(">H",data[2:4])
     source = data[12:16]
     dest = data[16:20]
-    rest = data[20:]
+    rest = data[20:length]
 
     print(f"Total Length= {length}")
     print(f"Src-IP= ", end="")
@@ -112,7 +112,8 @@ def showpkts_TCP(data, src, dst):
     while(data):
         (length, ) = struct.unpack("I",data[8:12])
         data1 = data[16:16+length]
-        if((x,) = struct.unpack(">H", data1[12:14]) and x  == 0x0800):
+        (x,) = struct.unpack(">H", data1[12:14])
+        if(x  == 0x0800):
             IPPkts.append(data1)
         data = data[16+length:]
 
@@ -120,19 +121,36 @@ def showpkts_TCP(data, src, dst):
 
     for i in IPPkts:
         data1 = i[14:]
-        if((x,) = struct.unpack("B", data[9]) and x == 6):
-            tcpPKTS.append((data1[12:16], data1[16:20], data1[20:]))
+#        (x,) = struct.unpack("B", data1[9])
+        x = data1[9]
+        if(x == 6):
+            tcpPkts.append((data1[12:16], data1[16:20], data1[20:]))
 
     packets = []
     for i in tcpPkts:
         offset = 4 * (i[2][12] // 16)
-        packets.append(i[0], i[2][:2], i[1], i[2][2:4], i[2][offset:])
+        packets.append((i[0], i[2][:2], i[1], i[2][2:4], i[2][offset:]))
 
     for i in packets:
-        if(getIP(i[0]) == src and getIP(i[2]) == dst or getIP(i[0]) == dst and
-           getIP(i[2]) == src):
-            
-            print(f"{src}")
+        if(i[0] == getIP(src) or i[0] == getIP(dst)):
+            if(i[2] == getIP(src) or i[2] == getIP(dst)):
+                if(i[4] != b""):
+                    printPKT(i)
+                
 def getIP(ip):
-    x = struct.unpack("BBBB", ip)
-    return f"{x[0]}.{x[1]}.{x[2]}.{x[3]}"
+    a = ip.split(".")
+    a = list(map(int, a))
+    x = struct.pack("BBBB", a[0],a[1],a[2],a[3])
+    return x
+
+def printPKT(i):
+    src = struct.unpack("BBBB", i[0])
+    src = ".".join(list(map(str,src)))
+    (srcp,) = struct.unpack(">H", i[1])
+    dst = struct.unpack("BBBB", i[2])
+    dst = ".".join(list(map(str,dst)))
+    (dstp,) = struct.unpack(">H", i[3])
+    msg = i[4]
+
+    print(f"{src}({srcp}) -> {dst}({dstp}) :")
+    print(f"\t{msg}")
