@@ -1,0 +1,7 @@
+Error will be visible in ECB and CBC. These will be mostly recovered, as
+there is only a minor change to one block. In these two encryption
+schemes, you can see a small disturbance to the image at one spot. With
+the CTR, since the plaintext isn't getting passed through the encryption
+algorithm, but rather XOR'ed with the encrypted counter, the error is
+not visible, as it is just the brightness of one color of one pixel that
+is affected.
